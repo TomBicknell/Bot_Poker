@@ -21,7 +21,10 @@ BOT_NAME = "Larp Bot"   # change this to your team's name!
 def preflop_score(cards):
     """Rough 0-1 score for a starting hand"""
     r1, r2 = sorted((rank(c) for c in cards), reverse=True)
-    suited = cards[0][-1] == cards[1][-1]
+    suited  = cards[0][-1] == cards[1][-1]
+
+    if is_pair(cards):
+        return 0.45 + r1 * 0.035
 
 def decide(state):
     """
