@@ -15,6 +15,7 @@ On Windows, type `python` (or `py`) instead of `python3`.
 """
 from pokerbot import all_in, call, check, fold, raise_to, run
 from pokerbot.cards import describe_hand, hand_strength, is_pair, rank
+import random
 
 BOT_NAME = "Larp Bot"   # change this to your team's name!
 
@@ -84,38 +85,38 @@ def decide(state):
     Don't worry about making an illegal move: it gets fixed for you, and a
     note is printed so you can see what happened.
     """
-    strength = hand_strength(state.my_cards, state.board)
+    try:
+        n_opp = active_opponents(state)
 
-    if state.street == "preflop":
-        score = preflop_score(state.my_cards)
-        if score >= 0.45:
-            if state.can_raise:
-                return raise_to(score * 1.5 + (state.my_stack() / 10))
-            else:
-                return call()
-        elif score >= 0.2:
-            if state.can_check:
-                return check()
-            else:
-                if state.to_call <= 100:
-                    return call()
+        if state.street == "preflop":
+            s = preflop_score(state.my_cards)
+            raise_threshold, call_threshold = 0.72, 0.50
         else:
-            return fold()
-    elif state.street == "flop":
-        score = hand_strength(state.my_cards, state.board)
-        if score >= 0.6:
-            if state.can_raise:
-                return raise_to(score * 1.5 + (state.my_stack() / 10))
-            else:
-                return call()
-        elif score >= 0.15:
-            if state.can_check:
-                return check()
-            else:
-                if state.to_call <= 100:
-                    return call()
-        else:
-            return fold()
+            s = hand_strength(state.my_cards, state.board)
+            s -= 0.03 * (n_opp - 1)
+            raise_threshold, call_threshold = 0.70, 0.40
+
+        if s >= 0.92 and state.can_raise:
+            return all_in()
+
+        if s >= raise_threshold and state.can_raise:
+            return bet_size(state, 0.75 if s >= 0.85 else 0.5)
+
+        if state.can_check:
+            if state.can_raise and s < 0.30 and random.random() < 0.08:
+                return bet_size(state, 0.5)
+            return check()
+
+        if s >= call_threshold and s > state.pot_odds + 0.10:
+            return call()
+        if state.pot_odds <= 0.15 and s >= 0.25:
+            return call()
+
+        return fold()
+
+    except Exception:
+        return check() if state.can_check else fold()
+
 
 # ----------------------------------------------------------------------
 # You don't need to change anything below this line.
