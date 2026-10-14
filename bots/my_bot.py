@@ -5,7 +5,7 @@ from pokerbot import all_in, call, check, fold, raise_to, run
 from pokerbot.cards import describe_hand, hand_strength, is_pair, rank
 import random
 
-BOT_NAME = "Larp Bot MAX v2"
+BOT_NAME = "Larp Bot"
 
 ALL_SUITS = ['s', 'h', 'd', 'c']
 
