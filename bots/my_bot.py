@@ -19,27 +19,18 @@ from pokerbot.cards import describe_hand, hand_strength, is_pair, rank
 BOT_NAME = "Larp Bot"   # change this to your team's name!
 
 def preflop_score(cards):
-    # Rough 0-1 score for a starting hand
+    """Rough 0-1 score for a starting hand"""
     r1, r2 = sorted((rank(c) for c in cards), reverse=True)
     suited  = cards[0][-1] == cards[1][-1]
 
-# calculates a strength based on what kind of pairing it is
     if is_pair(cards):
         return 0.45 + r1 * 0.035
 
-    # Points for card height: a 2 is worth 0, an ace is worth the maximum.
-    # Higher card counts up to 0.6, lower card up to 0.3.
     score = (r1 - 2) / 12 * 0.6 + (r2 - 2) / 12 * 0.3
-
-    # Bonus for suited cards (flush potential)
     if suited:
         score += 0.05
-
-    # Bonus for cards close together like J-10 or J-9 (straight potential)
     if r1 - r2 <= 2:
         score += 0.04
-
-    # Keep the score on the 0 to 1 scale
     if score > 1.0:
         score = 1.0
     return score
@@ -79,29 +70,8 @@ def decide(state):
     """
     strength = hand_strength(state.my_cards, state.board)
 
-    # 1. Big hand: raise! Before the flop, a high pair (nines or better) is
-    #    strong. After the flop, look for three of a kind or better.
     if state.street == "preflop":
-        strong = is_pair(state.my_cards) and rank(state.my_cards[0]) >= 9
-    else:
-        strong = strength >= 0.7
-
-    if strong and state.can_raise:
-        # Raise to three times the minimum, but never more than we're allowed
-        return raise_to(min(state.min_raise * 3, state.max_raise))
-
-    # 2. Free to stay in? Then check.
-    if state.can_check:
-        return check()
-
-    # 3. Decent hand, or calling is cheap compared to the pot: call.
-    if strength >= 0.3 or state.pot_odds <= 0.2:
-        return call()
-
-    # 4. Otherwise, give up.
-    return fold()
-
-
+        score = preflop_score(state.my_cards)
 # ----------------------------------------------------------------------
 # You don't need to change anything below this line.
 if __name__ == "__main__":
