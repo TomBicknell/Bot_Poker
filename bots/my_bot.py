@@ -19,7 +19,7 @@ from pokerbot.cards import describe_hand, hand_strength, is_pair, rank
 BOT_NAME = "Larp Bot"   # change this to your team's name!
 
 def preflop_score(cards):
-    """Rough 0-1 score for a starting hand"""
+# Rough 0-1 score for a starting hand
     r1, r2 = sorted((rank(c) for c in cards), reverse=True)
     suited  = cards[0][-1] == cards[1][-1]
 
@@ -34,6 +34,22 @@ def preflop_score(cards):
     if score > 1.0:
         score = 1.0
     return score
+
+def bet_size(state, fraction):
+# Raise to roughly `fraction` of the pot, clamped to legal limits."""
+    target = state.to_call + int(state.pot * fraction)
+    amount = max(state.min_raise, min(target, state.max_raise))
+    return raise_to(amount)
+
+
+def active_opponents(state):
+# Opponents still in the hand (falls back to all opponents).
+    try:
+        live = [o for o in state.opponents
+                if str(getattr(o, "status", "")).lower() not in ("folded", "fold", "out")]
+        return max(1, len(live))
+    except Exception:
+        return max(1, len(state.opponents))
 
 def decide(state):
     """
