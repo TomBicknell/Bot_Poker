@@ -6,7 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/bots/.venv" />
     </content>
-    <orderEntry type="jdk" jdkName="~\PycharmProjects\Bot_Poker\.venv" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="~/PycharmProjects/Bot_Poker/.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

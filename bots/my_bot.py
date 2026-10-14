@@ -53,70 +53,50 @@ def active_opponents(state):
         return max(1, len(state.opponents))
 
 def decide(state):
-    """
-    Called every time it's your turn. Look at `state`, then return ONE of:
-
-        fold()          give up this hand
-        check()         pass without betting (only if state.can_check)
-        call()          match the current bet (costs state.to_call chips)
-        raise_to(100)   make your total bet this round 100 chips
-        all_in()        bet everything
-
-    Handy things in `state`:
-        state.my_cards     your two cards, e.g. ["As", "Kd"]
-        state.board        the shared cards on the table
-        state.street       "preflop", "flop", "turn" or "river"
-        state.pot          chips in the middle
-        state.to_call      chips you need to call (0 means you can check)
-        state.can_check    True if checking is allowed
-        state.can_raise    True if raising is allowed
-        state.min_raise    smallest amount you can raise_to()
-        state.max_raise    largest amount you can raise_to() (all-in)
-        state.my_stack     chips you have left
-        state.opponents    the other players (name, stack, bet, status)
-        state.history      everything that has happened this hand
-        state.pot_odds     how much calling costs compared to the pot
-
-    And from pokerbot.cards:
-        hand_strength(my_cards, board)   a score from 0 (bad) to 1 (amazing)
-        describe_hand(my_cards, board)   e.g. "Two pair"
-        rank("As") -> 14,  is_pair(["Kh", "Kd"]) -> True
-
-    Don't worry about making an illegal move: it gets fixed for you, and a
-    note is printed so you can see what happened.
-    """
     try:
         n_opp = active_opponents(state)
 
         if state.street == "preflop":
             s = preflop_score(state.my_cards)
-            raise_threshold, call_threshold = 0.72, 0.50
+            raise_threshold, call_threshold = 0.65, 0.38
         else:
             s = hand_strength(state.my_cards, state.board)
-            s -= 0.03 * (n_opp - 1)
-            raise_threshold, call_threshold = 0.70, 0.40
 
-        if s >= 0.92 and state.can_raise:
+            # Slightly account for having more opponents
+            s -= 0.015 * (n_opp - 1)
+
+            raise_threshold, call_threshold = 0.62, 0.32
+
+        # Very strong hand -> go all in
+        if s >= 0.88 and state.can_raise:
             return all_in()
 
+        # Strong hand -> raise aggressively
         if s >= raise_threshold and state.can_raise:
-            return bet_size(state, 0.75 if s >= 0.85 else 0.5)
+            if s >= 0.80:
+                return bet_size(state, 0.85)
+            else:
+                return bet_size(state, 0.60)
 
+        # If nobody has bet, usually check.
+        # Occasionally bluff with a weak hand.
         if state.can_check:
-            if state.can_raise and s < 0.30 and random.random() < 0.08:
-                return bet_size(state, 0.5)
+            if state.can_raise and s < 0.30 and random.random() < 0.05:
+                return bet_size(state, 0.40)
+
             return check()
 
-        if s >= call_threshold and s > state.pot_odds + 0.10:
-            return call()
-        if state.pot_odds <= 0.15 and s >= 0.25:
-            return call()
+        # We have to call or fold
+        if s >= call_threshold:
+            # Call if the price is reasonable,
+            # or if we have a genuinely decent hand.
+            if state.pot_odds <= 0.25 or s >= 0.55:
+                return call()
 
         return fold()
 
     except Exception:
         return check() if state.can_check else fold()
-
 
 # ----------------------------------------------------------------------
 # You don't need to change anything below this line.
