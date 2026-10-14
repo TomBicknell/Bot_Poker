@@ -19,18 +19,27 @@ from pokerbot.cards import describe_hand, hand_strength, is_pair, rank
 BOT_NAME = "Larp Bot"   # change this to your team's name!
 
 def preflop_score(cards):
-    """Rough 0-1 score for a starting hand"""
+    # Rough 0-1 score for a starting hand
     r1, r2 = sorted((rank(c) for c in cards), reverse=True)
     suited  = cards[0][-1] == cards[1][-1]
 
+# calculates a strength based on what kind of pairing it is
     if is_pair(cards):
         return 0.45 + r1 * 0.035
 
+    # Points for card height: a 2 is worth 0, an ace is worth the maximum.
+    # Higher card counts up to 0.6, lower card up to 0.3.
     score = (r1 - 2) / 12 * 0.6 + (r2 - 2) / 12 * 0.3
+
+    # Bonus for suited cards (flush potential)
     if suited:
         score += 0.05
+
+    # Bonus for cards close together like J-10 or J-9 (straight potential)
     if r1 - r2 <= 2:
         score += 0.04
+
+    # Keep the score on the 0 to 1 scale
     if score > 1.0:
         score = 1.0
     return score
