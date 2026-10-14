@@ -26,6 +26,15 @@ def preflop_score(cards):
     if is_pair(cards):
         return 0.45 + r1 * 0.035
 
+    score = (r1 - 2) / 12 * 0.6 + (r2 - 2) / 12 * 0.3
+    if suited:
+        score += 0.05
+    if r1 - r2 <= 2:
+        score += 0.04
+    if score > 1.0:
+        score = 1.0
+    return score
+
 def decide(state):
     """
     Called every time it's your turn. Look at `state`, then return ONE of:
