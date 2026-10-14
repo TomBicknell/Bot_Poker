@@ -72,6 +72,20 @@ def decide(state):
 
     if state.street == "preflop":
         score = preflop_score(state.my_cards)
+        if score >= 0.45:
+            if state.can_raise:
+                return raise_to(score * 1.5 + (state.my_stack() / 10))
+            else:
+                return call()
+        elif score >= 0.2:
+            if state.can_check:
+                return check()
+            else:
+                if state.to_call <= 100
+                    return call()
+        else:
+            return fold()
+
 # ----------------------------------------------------------------------
 # You don't need to change anything below this line.
 if __name__ == "__main__":
