@@ -18,6 +18,10 @@ from pokerbot.cards import describe_hand, hand_strength, is_pair, rank
 
 BOT_NAME = "Larp Bot"   # change this to your team's name!
 
+def preflop_score(cards):
+    """Rough 0-1 score for a starting hand"""
+    r1, r2 = sorted((rank(c) for c in cards), reverse=True)
+    suited = cards[0][-1] == cards[1][-1]
 
 def decide(state):
     """
