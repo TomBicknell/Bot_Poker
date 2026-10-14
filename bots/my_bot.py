@@ -16,7 +16,7 @@ On Windows, type `python` (or `py`) instead of `python3`.
 from pokerbot import all_in, call, check, fold, raise_to, run
 from pokerbot.cards import describe_hand, hand_strength, is_pair, rank
 
-BOT_NAME = "Larp_Bot"   # change this to your team's name!
+BOT_NAME = "Larp Bot"   # change this to your team's name!
 
 
 def decide(state):
