@@ -101,6 +101,21 @@ def decide(state):
                     return call()
         else:
             return fold()
+    elif state.street == "flop":
+        score = hand_strength(state.my_cards, state.board)
+        if score >= 0.6:
+            if state.can_raise:
+                return raise_to(score * 1.5 + (state.my_stack() / 10))
+            else:
+                return call()
+        elif score >= 0.15:
+            if state.can_check:
+                return check()
+            else:
+                if state.to_call <= 100:
+                    return call()
+        else:
+            return fold()
 
 # ----------------------------------------------------------------------
 # You don't need to change anything below this line.
