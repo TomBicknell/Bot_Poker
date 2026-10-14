@@ -81,7 +81,7 @@ def decide(state):
             if state.can_check:
                 return check()
             else:
-                if state.to_call <= 100
+                if state.to_call <= 100:
                     return call()
         else:
             return fold()
